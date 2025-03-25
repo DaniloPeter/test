@@ -17,5 +17,5 @@ app.get("/api/users", async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log("server listening on port " + port);
+  console.log("server listening on http://localhost:" + port);
 });
