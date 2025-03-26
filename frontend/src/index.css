@@ -49,7 +49,12 @@ header {
   text-align: left;
   padding: 0 4px;
 }
-
+nav {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 4px;
+  align-items: center;
+}
 main {
   display: flex;
   flex-direction: column;
@@ -81,4 +86,10 @@ footer {
   border: #404f6d solid 1px;
   padding: 2px;
   text-align: center;
+}
+.profile-header {
+  width: 1em;
+  height: 1em;
+  background-color: #a7b6bf;
+  border-radius: 50%;
 }

@@ -1,49 +1,18 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+// src/App.jsx
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Header from "./components/Header";
+import Main from "./pages/Main";
+import About from "./pages/Profile";
 
 function App() {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/users")
-      .then((response) => {
-        setUsers(response.data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        setError(error + "Ошибка");
-        setLoading(false);
-      });
-  }, []);
-
-  if (loading) return <div>Загрузка...</div>;
-  if (error) return <div>{error}</div>;
-
   return (
-    <>
-      <h1>Список пользователей</h1>
-      <table className="user-table">
-        <thead>
-          <tr>
-            <th>Логин</th>
-            <th>Пароль</th>
-            <th>Админ</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((user) => (
-            <tr key={user.id}>
-              <td>{user.login}</td>
-              <td>{user.password}</td>
-              <td>{user.isAdmin ? "Да" : "Нет"}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </>
+    <Router>
+      <Header />
+      <Routes>
+        <Route path="/" element={<Main />} />
+        <Route path="/profile" element={<About />} />
+      </Routes>
+    </Router>
   );
 }
 
