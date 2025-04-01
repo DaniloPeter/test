@@ -4,7 +4,6 @@ const api = axios.create({
   baseURL: "http://localhost:5000/api",
 });
 
-// Добавление токена в заголовок для всех запросов
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
@@ -13,7 +12,6 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Обработка ошибок 401/403
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -25,4 +23,4 @@ api.interceptors.response.use(
   }
 );
 
-export default api; // Теперь экспортируется объект axios, а не функция
+export default api;

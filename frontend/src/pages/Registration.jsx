@@ -1,5 +1,5 @@
 import { useState } from "react";
-import api from "../api"; // Используем обёртку для axios
+import api from "../api";
 
 function Registration() {
   const [login, setLogin] = useState("");

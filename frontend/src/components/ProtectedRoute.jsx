@@ -1,4 +1,3 @@
-// frontend/src/components/ProtectedRoute.jsx
 import { Navigate, useLocation } from "react-router-dom";
 
 const ProtectedRoute = ({ children }) => {

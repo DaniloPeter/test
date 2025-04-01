@@ -1,7 +1,6 @@
 const multer = require("multer");
 const path = require("path");
 
-// Настройка multer для сохранения файлов
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "static/profiles");
