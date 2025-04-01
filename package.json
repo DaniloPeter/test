@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "install": "cd frontend && npm install && cd ../backend && npm install"
+    "install": "cd frontend && npm install && cd ../backend && npm install",
+    "backend": "cd backend && node server.js",
+    "frontend": "cd frontend && npm run dev"
   },
   "keywords": [],
   "author": "",

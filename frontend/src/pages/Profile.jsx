@@ -1,8 +1,6 @@
-// src/components/Header.jsx
-import { Link } from "react-router-dom";
-import { useEffect } from "react";
-import { useState } from "react";
-import axios from "axios";
+// frontend/src/pages/Profile.jsx
+import React, { useEffect, useState } from "react";
+import api from "../api";
 
 function Profile() {
   const [users, setUsers] = useState([]);
@@ -10,27 +8,35 @@ function Profile() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/users")
-      .then((response) => {
+    const fetchUsers = async () => {
+      try {
+        const response = await api.get("/users");
         setUsers(response.data);
+      } catch (error) {
+        console.error("Ошибка при загрузке пользователей:", error);
+        setError(error);
+      } finally {
         setLoading(false);
-      })
-      .catch((error) => {
-        setError(error + " Ошибка");
-        setLoading(false);
-      });
+      }
+    };
+
+    fetchUsers();
   }, []);
 
   if (loading) return <div>Загрузка...</div>;
   if (error) return <div>{error}</div>;
+
   return (
-    <>
-      <div>
-        <span>Profile</span>
-        <span>{users[1].login}</span>
-      </div>
-    </>
+    <div>
+      <h2>Профиль</h2>
+      <ul>
+        {users.map((user) => (
+          <li key={user.id}>
+            Логин: {user.login}, Админ: {user.isAdmin ? "Да" : "Нет"}
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

@@ -1,6 +1,5 @@
-// src/Main.jsx
+import api from "../api";
 import { useEffect, useState } from "react";
-import axios from "axios";
 
 function Main() {
   const [users, setUsers] = useState([]);
@@ -8,16 +7,22 @@ function Main() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/users")
-      .then((response) => {
+    const fetchUsers = async () => {
+      try {
+        const response = await api.get("/users");
         setUsers(response.data);
+      } catch (error) {
+        if (error.response?.status === 401) {
+          console.error(error);
+          return;
+        }
+        setError(error + "Ошибка при загрузке пользователей");
+      } finally {
         setLoading(false);
-      })
-      .catch((error) => {
-        setError(error + " Ошибка");
-        setLoading(false);
-      });
+      }
+    };
+
+    fetchUsers();
   }, []);
 
   if (loading) return <div>Загрузка...</div>;

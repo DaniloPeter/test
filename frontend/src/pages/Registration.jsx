@@ -1,29 +1,30 @@
 import { useState } from "react";
 import api from "../api"; // Используем обёртку для axios
-import { useNavigate } from "react-router-dom";
 
-function Login() {
+function Registration() {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await api.post("/login", { login, password });
-      const { token } = response.data;
-      localStorage.setItem("token", token);
-      navigate("/");
+      await api.post("/register", { login, password });
+      alert("Регистрация успешна!");
+      window.location.href = "/login";
     } catch (error) {
-      alert(error, +" Неверный логин или пароль");
+      if (error.response?.status === 400) {
+        alert("Ошибка: " + error.response.data.message);
+      } else {
+        alert("Произошла ошибка");
+      }
     }
   };
 
   return (
     <div>
-      <h2>Авторизация</h2>
-      <form onSubmit={handleLogin}>
+      <h2>Регистрация</h2>
+      <form onSubmit={handleRegister}>
         <input
           type="text"
           placeholder="Логин"
@@ -40,10 +41,10 @@ function Login() {
           required
         />
         <br />
-        <button type="submit">Войти</button>
+        <button type="submit">Зарегистрироваться</button>
       </form>
     </div>
   );
 }
 
-export default Login;
+export default Registration;
