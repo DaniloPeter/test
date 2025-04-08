@@ -16,8 +16,13 @@ function Login() {
       localStorage.setItem("token", token);
       navigate("/");
     } catch (error) {
-      alert(error, +" Неверный логин или пароль");
+      if (error.response) alert(error.response.data.message);
     }
+  };
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    navigate("/register");
   };
 
   return (
@@ -41,6 +46,9 @@ function Login() {
         />
         <br />
         <button type="submit">Войти</button>
+        <button type="button" onClick={handleRegister}>
+          Регистрация
+        </button>
       </form>
     </div>
   );

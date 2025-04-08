@@ -19,6 +19,43 @@ app.use(
 
 app.use(express.json());
 
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) return res.sendStatus(401);
+
+  jwt.verify(token, jwtSecret, (err, user) => {
+    if (err) return res.sendStatus(403);
+    req.user = user;
+    next();
+  });
+}
+
+app.get("/api/users", authenticateToken, async (req, res) => {
+  try {
+    const users = await User.findAll();
+    res.json(users);
+  } catch (err) {
+    res.status(404).json({ message: err.message });
+  }
+});
+
+app.get("/api/user", authenticateToken, async (req, res) => {
+  console.log(authenticateToken);
+  try {
+    const user = await User.findByPk(req.user.id);
+    console.log(user);
+    if (!user) {
+      return res.status(404).json({ message: "Пользователь не найден" });
+    }
+    res.json(user);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Произошла ошибка сервера" });
+  }
+});
+
 app.post("/api/register", async (req, res) => {
   const { login, password } = req.body;
 
@@ -69,25 +106,27 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
-function authenticateToken(req, res, next) {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
+app.put("/api/user", authenticateToken, async (req, res) => {
+  const { login, password } = req.body;
 
-  if (!token) return res.sendStatus(401);
-
-  jwt.verify(token, jwtSecret, (err, user) => {
-    if (err) return res.sendStatus(403);
-    req.user = user;
-    next();
-  });
-}
-
-app.get("/api/users", authenticateToken, async (req, res) => {
   try {
-    const users = await User.findAll();
-    res.json(users);
+    const user = await User.findByPk(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: "Пользователь не найден" });
+    }
+
+    user.login = login;
+
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      user.password = hashedPassword;
+    }
+
+    await user.save();
+    res.json({ message: "Данные успешно обновлены", user });
   } catch (err) {
-    res.status(404).json({ message: err.message });
+    console.error(err);
+    res.status(500).json({ message: "Произошла ошибка сервера" });
   }
 });
 
