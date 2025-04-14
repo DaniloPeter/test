@@ -1,38 +1,47 @@
-// routes/results.js
 const express = require("express");
 const router = express.Router();
-const { User, Question } = require("../models");
+const { TestResult, Question, Test } = require("../models");
 const authenticateToken = require("../middleware/auth");
 
 router.post("/", authenticateToken, async (req, res) => {
-  const { answers } = req.body;
-
-  if (!answers || Object.keys(answers).length === 0) {
-    return res.status(400).json({ message: "Ответы не предоставлены" });
-  }
+  const { answers, testId } = req.body;
 
   try {
+    // Получаем все вопросы теста
     const questions = await Question.findAll({
-      where: { id: Object.keys(answers) },
+      where: { testId, id: Object.keys(answers) },
       attributes: ["id", "correctAnswer"],
     });
 
+    // Считаем правильные ответы
     const correctCount = questions.reduce((acc, q) => {
       return acc + (answers[q.id] === q.correctAnswer ? 1 : 0);
     }, 0);
 
-    const user = await User.findByPk(req.user.id);
-    user.score += correctCount;
-    await user.save();
+    // Находим или создаем результат
+    const [testResult, created] = await TestResult.findOrCreate({
+      where: { userId: req.user.id, testId },
+      defaults: { score: correctCount },
+    });
+
+    // Обновляем если новый результат лучше
+    if (!created && correctCount > testResult.score) {
+      testResult.score = correctCount;
+      await testResult.save();
+    }
+
+    // Получаем полную информацию о тесте
+    const test = await Test.findByPk(testId);
 
     res.json({
-      score: correctCount,
-      total: questions.length,
-      userScore: user.score,
+      testTitle: test.title,
+      currentScore: correctCount,
+      bestScore: testResult.score,
+      totalQuestions: questions.length,
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Ошибка при обработке результатов" });
+    res.status(500).json({ message: "Ошибка при сохранении результата" });
   }
 });
 

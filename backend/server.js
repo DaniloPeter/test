@@ -3,7 +3,7 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken");
 
 const bcrypt = require("bcrypt");
-const { User } = require("./models");
+const { User, TestResult, Test, Question } = require("./models");
 
 const app = express();
 const port = 5000;
@@ -36,18 +36,41 @@ app.get("/api/users", authenticateToken, async (req, res) => {
   }
 });
 
+// server.js (GET /api/user)
 app.get("/api/user", authenticateToken, async (req, res) => {
-  console.log(authenticateToken);
   try {
-    const user = await User.findByPk(req.user.id);
-    console.log(user);
-    if (!user) {
-      return res.status(404).json({ message: "Пользователь не найден" });
-    }
-    res.json(user);
+    const user = await User.findByPk(req.user.id, {
+      include: [
+        {
+          model: TestResult,
+          include: [
+            {
+              model: Test,
+              include: [Question],
+            },
+          ],
+        },
+      ],
+    });
+
+    const formattedUser = {
+      id: user.id,
+      login: user.login,
+      isAdmin: user.isAdmin,
+      testResults: user.TestResults.map((result) => ({
+        testId: result.testId,
+        bestScore: result.score,
+        test: {
+          title: result.Test.title,
+          questionsCount: result.Test.questions.length,
+        },
+      })),
+    };
+
+    res.json(formattedUser);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Произошла ошибка сервера" });
+    res.status(500).json({ message: "Ошибка сервера" });
   }
 });
 

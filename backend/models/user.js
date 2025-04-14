@@ -9,7 +9,10 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      User.hasMany(models.TestResult, {
+        foreignKey: "userId",
+        as: "testResults",
+      });
     }
   }
   User.init(
@@ -20,10 +23,6 @@ module.exports = (sequelize, DataTypes) => {
       profilePicture: {
         type: DataTypes.STRING,
         allowNull: true,
-      },
-      score: {
-        type: DataTypes.INTEGER,
-        defaultValue: 0,
       },
     },
     {

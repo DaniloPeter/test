@@ -1,4 +1,3 @@
-// models/test.js
 module.exports = (sequelize, DataTypes) => {
   const Test = sequelize.define(
     "Test",
@@ -15,7 +14,14 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   Test.associate = (models) => {
-    Test.hasMany(models.Question, { foreignKey: "testId", as: "questions" });
+    Test.hasMany(models.Question, {
+      foreignKey: "testId",
+      as: "questions",
+    });
+    Test.hasMany(models.TestResult, {
+      foreignKey: "testId",
+      as: "results",
+    });
   };
 
   return Test;

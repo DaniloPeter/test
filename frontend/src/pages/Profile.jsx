@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../api";
 
 function Profile() {
@@ -6,69 +6,58 @@ function Profile() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const [newLogin, setNewLogin] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchProfile = async () => {
       try {
         const response = await api.get("/user");
         setUser(response.data);
-        setNewLogin(response.data.login);
-      } catch (error) {
-        console.error("Ошибка при загрузке пользователей:", error);
-        setError(error.response?.data?.message || "Ошибка");
+      } catch (err) {
+        setError("Ошибка загрузки профиля");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUser();
+    fetchProfile();
   }, []);
-
-  const handleUpdate = async (e) => {
-    e.preventDefault();
-
-    try {
-      await api.put("/user", {
-        login: newLogin,
-        password: newPassword,
-      });
-      alert("Изменения сохранены");
-    } catch (error) {
-      console.error("Ошибка при сохранении изменений:", error);
-      console.error(error.response?.data?.message || "Ошибка");
-    }
-  };
 
   if (loading) return <div>Загрузка...</div>;
   if (error) return <div>{error}</div>;
 
   return (
-    <div>
-      <h2>Профиль {user.login}</h2>
-      <form onSubmit={handleUpdate}>
-        <h3>Редактировать</h3>
-        <label>
-          Логин:
-          <input
-            type="text"
-            value={newLogin}
-            onChange={(e) => setNewLogin(e.target.value)}
-          />
-        </label>
-        <br />
-        <label>
-          Пароль:
-          <input
-            type="password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-          />
-        </label>
-        <br />
-        <button type="submit">Сохранить изменения</button>
-      </form>
+    <div className="profile-container">
+      <h2>Профиль пользователя</h2>
+      <div className="user-info">
+        <p>Логин: {user.login}</p>
+        <p>Роль: {user.isAdmin ? "Администратор" : "Пользователь"}</p>
+      </div>
+
+      <div className="test-results">
+        <h3>Результаты тестов:</h3>
+        {user.testResults?.length > 0 ? (
+          user.testResults.map((result) => (
+            <div key={result.testId} className="test-result-item">
+              <div className="test-title">
+                {result.test.title}
+                <span className="best-score">
+                  Лучший результат: {result.bestScore}/
+                  {result.test.questions.length}
+                </span>
+                <Link to={`/test/${result.testId}`}>
+                  <button className="retry-button">Повторить тест</button>
+                </Link>
+              </div>
+              <progress
+                value={result.bestScore}
+                max={result.test.questions.length}
+                className="progress-bar"
+              />
+            </div>
+          ))
+        ) : (
+          <p>Вы еще не проходили тесты</p>
+        )}
+      </div>
     </div>
   );
 }

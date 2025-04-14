@@ -1,15 +1,22 @@
 // ResultPage.jsx
 import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-function ResultPage() {
-  const { score, total } = useParams();
+function TestResultPage() {
+  const { testId, bestScore, total } = useParams();
 
   return (
-    <div className="result-page">
-      <h2>Итог тестирования</h2>
+    <div className="result-container">
+      <h2>Результат теста</h2>
       <p>
-        Вы правильно ответили на {score} из {total} вопросов
+        Лучший результат: {bestScore}/{total}
       </p>
+      <p>
+        Текущая попытка: {currentScore}/{total}
+      </p>
+      <button onClick={() => navigate(`/test/${testId}`)}>
+        Повторить тест
+      </button>
     </div>
   );
 }
