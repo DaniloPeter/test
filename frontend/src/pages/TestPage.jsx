@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import api from "../api";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function TestPage() {
   const { id } = useParams();
@@ -9,6 +10,8 @@ function TestPage() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [result, setResult] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -49,9 +52,12 @@ function TestPage() {
 
   const handleSubmit = async () => {
     try {
-      // Здесь можно добавить отправку результатов на сервер
-      console.log("Ответы:", answers);
-      alert("Тест отправлен!");
+      const response = await api.post("/results", { answers });
+
+      setResult({
+        score: response.data.score,
+        total: response.data.total,
+      });
     } catch (error) {
       setError("Ошибка при отправке теста");
     }
@@ -59,6 +65,18 @@ function TestPage() {
 
   if (loading) return <div className="loading">Загрузка...</div>;
   if (error) return <div className="error">{error}</div>;
+
+  if (result) {
+    return (
+      <div className="result-container">
+        <h2>Результат теста</h2>
+        <p>
+          Правильных ответов: {result.score}/{result.total}
+        </p>
+        <button onClick={() => navigate("/")}>На главную</button>
+      </div>
+    );
+  }
 
   const currentQuestion = questions[currentQuestionIndex];
 

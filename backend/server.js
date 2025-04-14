@@ -1,14 +1,14 @@
 const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
+
 const bcrypt = require("bcrypt");
 const { User } = require("./models");
 
 const app = express();
 const port = 5000;
 
-const jwtSecret =
-  "3a5b7c9d1e3f5a7b9c1d3e5f7a9b1c3d5e7f9a1b3c5d7e9f1a3b5c7d9e1f3a5b7c9d1e3f5a7b9c1d";
+const { jwtSecret } = require("./config");
 
 app.use(
   cors({
@@ -19,21 +19,13 @@ app.use(
 
 app.use(express.json());
 
-function authenticateToken(req, res, next) {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-
-  if (!token) return res.sendStatus(401);
-
-  jwt.verify(token, jwtSecret, (err, user) => {
-    if (err) return res.sendStatus(403);
-    req.user = user;
-    next();
-  });
-}
+const authenticateToken = require("./middleware/auth");
 
 const testsRouter = require("./routes/tests");
 app.use("/api/tests", testsRouter);
+
+const resultsRouter = require("./routes/results");
+app.use("/api/results", resultsRouter);
 
 app.get("/api/users", authenticateToken, async (req, res) => {
   try {
