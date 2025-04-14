@@ -32,6 +32,9 @@ function authenticateToken(req, res, next) {
   });
 }
 
+const testsRouter = require("./routes/tests");
+app.use("/api/tests", testsRouter);
+
 app.get("/api/users", authenticateToken, async (req, res) => {
   try {
     const users = await User.findAll();
