@@ -36,17 +36,23 @@ app.get("/api/users", authenticateToken, async (req, res) => {
   }
 });
 
-// server.js (GET /api/user)
 app.get("/api/user", authenticateToken, async (req, res) => {
   try {
     const user = await User.findByPk(req.user.id, {
       include: [
         {
           model: TestResult,
+          as: "testResults", // Добавлен алиас
           include: [
             {
               model: Test,
-              include: [Question],
+              as: "test", // Добавлен алиас
+              include: [
+                {
+                  model: Question,
+                  as: "questions", // Добавлен алиас
+                },
+              ],
             },
           ],
         },
@@ -57,12 +63,12 @@ app.get("/api/user", authenticateToken, async (req, res) => {
       id: user.id,
       login: user.login,
       isAdmin: user.isAdmin,
-      testResults: user.TestResults.map((result) => ({
+      testResults: user.testResults.map((result) => ({
         testId: result.testId,
         bestScore: result.score,
         test: {
-          title: result.Test.title,
-          questionsCount: result.Test.questions.length,
+          title: result.test.title,
+          questionsCount: result.test.questions.length,
         },
       })),
     };

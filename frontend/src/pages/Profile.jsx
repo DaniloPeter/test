@@ -35,25 +35,24 @@ function Profile() {
       <div className="test-results">
         <h3>Результаты тестов:</h3>
         {user.testResults?.length > 0 ? (
-          user.testResults.map((result) => (
-            <div key={result.testId} className="test-result-item">
-              <div className="test-title">
-                {result.test.title}
-                <span className="best-score">
-                  Лучший результат: {result.bestScore}/
-                  {result.test.questions.length}
-                </span>
-                <Link to={`/test/${result.testId}`}>
-                  <button className="retry-button">Повторить тест</button>
-                </Link>
+          user.testResults
+            ?.filter((result) => result.test)
+            .map((result) => (
+              <div key={result.testId} className="test-result-item">
+                <div className="test-title">
+                  {result.test?.title || "Неизвестный тест"}
+                  <span className="best-score">
+                    Лучший результат: {result.bestScore}/
+                    {result.test?.questionsCount || 0}
+                  </span>
+                </div>
+                <progress
+                  value={result.bestScore}
+                  max={result.test?.questionsCount || 0}
+                  className="progress-bar"
+                />
               </div>
-              <progress
-                value={result.bestScore}
-                max={result.test.questions.length}
-                className="progress-bar"
-              />
-            </div>
-          ))
+            ))
         ) : (
           <p>Вы еще не проходили тесты</p>
         )}
