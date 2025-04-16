@@ -8,7 +8,10 @@ const authenticateToken = (req, res, next) => {
   if (!token) return res.sendStatus(401);
 
   jwt.verify(token, jwtSecret, (err, user) => {
-    if (err) return res.sendStatus(403);
+    if (err) {
+      console.log("Token verification error:", err);
+      return res.sendStatus(403);
+    }
     req.user = user;
     next();
   });

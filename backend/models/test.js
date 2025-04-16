@@ -17,10 +17,12 @@ module.exports = (sequelize, DataTypes) => {
     Test.hasMany(models.Question, {
       foreignKey: "testId",
       as: "questions",
+      onDelete: "CASCADE",
     });
     Test.hasMany(models.TestResult, {
       foreignKey: "testId",
       as: "results",
+      onDelete: "CASCADE",
     });
   };
 

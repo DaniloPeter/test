@@ -81,7 +81,6 @@ function TestPage() {
     <div className="test-container">
       {!result ? (
         <>
-          <h2>Тест</h2>
           <div className="progress">
             Вопрос {currentQuestionIndex + 1} из {questions.length}
           </div>

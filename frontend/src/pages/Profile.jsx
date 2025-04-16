@@ -6,6 +6,9 @@ function Profile() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [newLogin, setNewLogin] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -21,15 +24,57 @@ function Profile() {
     fetchProfile();
   }, []);
 
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+
+    try {
+      await api.put("/user", {
+        login: newLogin,
+        password: newPassword,
+      });
+      alert("Изменения сохранены");
+    } catch (error) {
+      console.error("Ошибка при сохранении изменений:", error);
+      console.error(error.response?.data?.message || "Ошибка");
+    }
+  };
+
   if (loading) return <div>Загрузка...</div>;
   if (error) return <div>{error}</div>;
 
   return (
     <div className="profile-container">
-      <h2>Профиль пользователя</h2>
-      <div className="user-info">
-        <p>Логин: {user.login}</p>
-        <p>Роль: {user.isAdmin ? "Администратор" : "Пользователь"}</p>
+      <div className="profile-info">
+        <h2>Профиль пользователя {user.login}</h2>
+        <div className="user-info">
+          <p className={`${user.isAdmin ? "info-visible" : "info-hidden"}`}>
+            Роль: {user.isAdmin ? "Администратор" : "Пользователь"}
+          </p>
+        </div>
+        <form onSubmit={handleUpdate}>
+          <h3>Редактировать</h3>
+          <label>
+            Логин:
+            <input
+              type="text"
+              value={user.login}
+              onChange={(e) => setNewLogin(e.target.value)}
+            />
+          </label>
+          <br />
+          <label>
+            Пароль:
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+            />
+          </label>
+          <br />
+          <button className="submit-btn" type="submit">
+            Сохранить изменения
+          </button>
+        </form>
       </div>
 
       <div className="test-results">

@@ -22,7 +22,7 @@ function Registration() {
   };
 
   return (
-    <div>
+    <div className="register-container">
       <h2>Регистрация</h2>
       <form onSubmit={handleRegister}>
         <input

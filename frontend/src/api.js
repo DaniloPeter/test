@@ -4,6 +4,11 @@ const api = axios.create({
   baseURL: "http://localhost:5000/api",
 });
 
+// Методы для работы с тестами
+api.createTest = (title) => api.post("/tests", { title });
+api.deleteTest = (id) => api.delete(`/tests/${id}`);
+
+// Существующие интерсепторы остаются без изменений
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
