@@ -60,4 +60,31 @@ router.get("/:id/questions", async (req, res) => {
   }
 });
 
+// Создание вопроса в тесте (только для админов)
+router.post("/:testId/questions", authenticateToken, async (req, res) => {
+  if (!req.user.isAdmin) return res.sendStatus(403);
+  try {
+    const newQuestion = await Question.create({
+      testId: req.params.testId,
+      questionText: req.body.questionText,
+      answerOptions: JSON.stringify(req.body.answerOptions),
+      correctAnswer: req.body.correctAnswer,
+    });
+    res.status(201).json(newQuestion);
+  } catch (error) {
+    res.status(500).json({ message: "Ошибка при создании вопроса" });
+  }
+});
+
+// Удаление вопроса (только для админов)
+router.delete("/questions/:id", authenticateToken, async (req, res) => {
+  if (!req.user.isAdmin) return res.sendStatus(403);
+  try {
+    await Question.destroy({ where: { id: req.params.id } });
+    res.status(204).send();
+  } catch (error) {
+    res.status(500).json({ message: "Ошибка при удалении вопроса" });
+  }
+});
+
 module.exports = router;

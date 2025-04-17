@@ -3,6 +3,12 @@ import api from "../api";
 import { useEffect, useState } from "react";
 
 function TestPage() {
+  const [isAddingQuestion, setIsAddingQuestion] = useState(false);
+  const [newQuestion, setNewQuestion] = useState({
+    questionText: "",
+    answerOptions: [{ value: "" }, { value: "" }],
+    correctAnswer: "",
+  });
   const { id } = useParams();
   const navigate = useNavigate();
   const [questions, setQuestions] = useState([]);
@@ -11,8 +17,18 @@ function TestPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
+    const checkAdminStatus = async () => {
+      try {
+        const response = await api.get("/user");
+        setIsAdmin(response.data.isAdmin);
+      } catch (error) {
+        setIsAdmin(false);
+      }
+    };
+
     const fetchQuestions = async () => {
       try {
         const response = await api.get(`/tests/${id}/questions`);
@@ -31,6 +47,7 @@ function TestPage() {
       }
     };
 
+    checkAdminStatus();
     fetchQuestions();
     setResult(null); // Сброс результата при смене теста
   }, [id]);
@@ -79,10 +96,119 @@ function TestPage() {
 
   return (
     <div className="test-container">
+      {isAdmin && (
+        <div className="admin-question-form">
+          <button onClick={() => setIsAddingQuestion(!isAddingQuestion)}>
+            {isAddingQuestion ? "Отмена" : "Добавить вопрос"}
+          </button>
+
+          {isAddingQuestion && (
+            <div className="question-editor">
+              <input
+                type="text"
+                placeholder="Текст вопроса"
+                value={newQuestion.questionText}
+                onChange={(e) =>
+                  setNewQuestion({
+                    ...newQuestion,
+                    questionText: e.target.value,
+                  })
+                }
+              />
+
+              {newQuestion.answerOptions.map((option, index) => (
+                <input
+                  key={index}
+                  type="text"
+                  value={option.value}
+                  placeholder={`Вариант ${index + 1}`}
+                  onChange={(e) => {
+                    const newOptions = [...newQuestion.answerOptions];
+                    newOptions[index].value = e.target.value;
+                    setNewQuestion({
+                      ...newQuestion,
+                      answerOptions: newOptions,
+                    });
+                  }}
+                />
+              ))}
+
+              <select
+                value={newQuestion.correctAnswer}
+                onChange={(e) =>
+                  setNewQuestion({
+                    ...newQuestion,
+                    correctAnswer: e.target.value,
+                  })
+                }
+              >
+                <option value="">Правильный ответ</option>
+                {newQuestion.answerOptions.map((option, index) => (
+                  <option key={index} value={option.value}>
+                    {option.value}
+                  </option>
+                ))}
+              </select>
+
+              <button
+                onClick={async () => {
+                  try {
+                    const createdQuestion = await api.createQuestion(
+                      id,
+                      newQuestion
+                    );
+                    setQuestions([
+                      ...questions,
+                      {
+                        ...createdQuestion.data,
+                        answerOptions: JSON.parse(
+                          createdQuestion.data.answerOptions
+                        ),
+                      },
+                    ]);
+                    setNewQuestion({
+                      questionText: "",
+                      answerOptions: [{ value: "" }, { value: "" }],
+                      correctAnswer: "",
+                    });
+                    setIsAddingQuestion(false);
+                  } catch (error) {
+                    console.error("Ошибка создания вопроса:", error);
+                  }
+                }}
+              >
+                Сохранить вопрос
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
       {!result ? (
         <>
           <div className="progress">
             Вопрос {currentQuestionIndex + 1} из {questions.length}
+            {isAdmin && questions[currentQuestionIndex] && (
+              <button
+                className="delete-question-button"
+                onClick={async () => {
+                  if (window.confirm("Удалить вопрос?")) {
+                    try {
+                      const currentQuestionId =
+                        questions[currentQuestionIndex].id;
+                      await api.deleteQuestion(currentQuestionId);
+                      setQuestions(
+                        questions.filter((q) => q.id !== currentQuestionId)
+                      );
+                    } catch (error) {
+                      console.error("Ошибка удаления вопроса:", error);
+                    }
+                  }
+                }}
+              >
+                ×
+              </button>
+            )}
           </div>
 
           {questions[currentQuestionIndex] && (
