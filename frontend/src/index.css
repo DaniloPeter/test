@@ -189,6 +189,7 @@ footer {
   margin: 1px;
   padding: 2vh;
   display: flex;
+  justify-content: start;
   align-items: center;
   border: 1px solid #404f6d;
   gap: 10px;
